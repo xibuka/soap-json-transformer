@@ -91,7 +91,8 @@ function SoapTransformerHandler:body_filter(conf)
     end
 
     kong.log.debug("Response body XML: "..resp_body)
-    ngx.arg[1] = self.convertXMLtoJSON(resp_body, conf)
+    -- ngx.arg[1] = self.convertXMLtoJSON(resp_body, conf)
+    ngx.arg[1] = resp_body
     kong.log.debug("Response body JSON: "..ngx.arg[1])
 end
 
