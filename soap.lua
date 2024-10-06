@@ -126,13 +126,28 @@ end
 -- Cleans old header element anyway.
 ---------------------------------------------------------------------
 local header_template = {
-	tag = "soap:Header",
+	-- SJM
+	-- tag = "soap:Header",
+	tag = "soapenv:Header"
 }
 local function insert_header (obj, header)
 	-- removes old header
 	if obj[2] then
 		tremove (obj, 1)
 	end
+
+
+	-- SJM
+	header = {
+		tag = "ns:KwsSoapHeader",
+		attr = {},
+		{
+			tag = "ns:SessionId",
+			attr = {},
+			"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+		}
+	}
+
 	if header then
 		header_template[1] = header
 		tinsert (obj, 1, header_template)
@@ -167,11 +182,9 @@ local function encode (args)
 
     local envelope_template = {
         tag = soap_prefix .. ":Envelope",
-        attr = { "xmlns:" .. soap_prefix, soap_prefix .. ":encodingStyle", "xmlns:xsi", "xmlns:xsd",
+        attr = { "xmlns:" .. soap_prefix, "xmlns:ns",
             ["xmlns:" .. soap_prefix] = namespace,
-            [soap_prefix .. ":encodingStyle"] = "http://schemas.xmlsoap.org/soap/encoding/",
-            ["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance",
-            ["xmlns:xsd"] = "http://www.w3.org/2001/XMLSchema",
+            ["xmlns:ns"] = "http://www.shijinet.com.cn/kunlun/kws/1.1/",
         },
         {
             tag = soap_prefix .. ":Body",
@@ -189,11 +202,12 @@ local function encode (args)
 		method = args.internal_namespace..":"..method
 	end
 	-- Cleans old header and insert a new one (if it exists).
+
 	insert_header (envelope_template, args.header)
 	-- Sets new body contents (and erase old content).
 	local body = (envelope_template[2] and envelope_template[2][1]) or envelope_template[1][1]
 	for i = 1, max (#body, #args.entries) do
-		body[i] = args.entries[i]
+		body[i] = { tag = "ns:" .. args.entries[i].tag, attr = args.entries[i].attr, unpack(args.entries[i]) }
 	end
 	-- Sets method (actually, the table's tag) and namespace.
 	body.tag = method

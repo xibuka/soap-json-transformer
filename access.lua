@@ -7,8 +7,11 @@ local insert = table.insert
 local _M = {}
 
 local function parse_json(body)
+
+    kong.log.debug("Transformed body: "..body)
     if body then
         local status, res = pcall(cjson.decode, body)
+        --kong.log.debug("res: "..res)
         if status then
             return res
         end
@@ -34,7 +37,9 @@ local function transform_json_body_into_soap(conf, body)
         return false, nil
     end
 
-    local body = parameters.body[conf.method]
+    --local body = parameters.body[conf.method]
+    --local body = parameters[conf.method]
+    local body = parameters.data
     local encode_args = {}
     local root = {}
     parse_entries(body, root)
